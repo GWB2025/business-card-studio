@@ -7,3 +7,7 @@
   border-radius: 12% / 18%;
   pointer-events: none;
 }
+
+#qr-settings { margin-bottom: 18px; }
+#qr-settings label { margin-bottom: 6px; }
+.qr-error { color: #943e34; }

@@ -1,6 +1,7 @@
 (function(root){
  'use strict';
- const defaults={name:'GORDON',subtitle:'MATHEMATICS\nMAKING · ART',contact:'',prompt:'TAP TO CONNECT',showNfc:true,centreOnChip:true,width:85,height:55,margin:4,font:'sans',nameSize:6,bodySize:2.2,stroke:.45,colour:'#000000',motif:'vortex',density:19,twist:2.2,phase:0};
+ const qrPlotter = typeof module === 'object' && module.exports ? require('./qr.js') : root.CardQr;
+ const defaults={name:'GORDON',subtitle:'MATHEMATICS\nMAKING · ART',contact:'',prompt:'TAP TO CONNECT',showNfc:true,centreOnChip:true,showQr:false,qrUrl:'',width:85,height:55,margin:4,font:'sans',nameSize:6,bodySize:2.2,stroke:.45,colour:'#000000',motif:'vortex',density:19,twist:2.2,phase:0};
  // Millimetres from the top-left corner of this landscape NFC stock.
  const nfcChip = Object.freeze({ x: 20, y: 35, width: 7.5, height: 5 });
  function isChipCard(design) {
@@ -22,6 +23,7 @@
   }
   if(d.margin*2>=Math.min(d.width,d.height)*.6)throw Error('The margin leaves too little room for this card.');
   if(!['vortex','waves','orbit'].includes(d.motif)||!/^#[0-9a-f]{6}$/i.test(d.colour)||typeof d.showNfc!=='boolean')throw Error('Choose valid pattern and pen settings.');
+  if(typeof d.showQr !== 'boolean' || typeof d.qrUrl !== 'string')throw Error('Check the QR code settings.');
   if(typeof d.centreOnChip!=='boolean')throw Error('Choose a valid tap prompt position.');
   for(const key of ['name','subtitle','contact','prompt'])if(typeof d[key]!=='string'||d[key].length>240||/[\u0000-\u0008\u000b-\u001f]/.test(d[key]))throw Error('Keep each text field under 240 characters.');
   return d;
@@ -132,7 +134,8 @@
  }
  function build(input,fonts){
   const d=validate(input),font=fonts.find(f=>f.id===d.font);if(!font)throw Error('Choose an available stroke font.');
-  const warnings=[],paths=motif(d),area=[d.margin,d.margin,d.width-d.margin,d.height-d.margin];
+  const qr = d.showQr ? qrPlotter.plot(d) : null;
+  const warnings=[],paths=qr ? [] : motif(d),area=[d.margin,d.margin,d.width-d.margin,d.height-d.margin];
   const textWidth=d.width*.53-d.margin-1.5,x=d.margin;
   const nameY=d.height*.29;
   const name=textPaths(d.name,font,x,nameY,d.nameSize,textWidth,warnings,'Name');paths.push(...name.paths);
@@ -152,16 +155,26 @@
   let clipped=false;
   for(const p of [...paths, ...(tap?.lettering ?? []), ...(tap?.signal ?? [])].flat())if(p[0]<area[0]-.01||p[0]>area[2]+.01||p[1]<area[1]-.01||p[1]>area[3]+.01)clipped=true;
   if(clipped)warnings.push('Some text reaches the safe margin. Shorten the text or reduce its size.');
-  const artwork = clipPaths(paths, area);
-  const lettering = clipPaths(tap?.lettering ?? [], area);
-  const signal = clipPaths(tap?.signal ?? [], area);
-  const safe = [...artwork, ...lettering, ...signal];
+  const textArea = qr ? [area[0], area[1], d.width * .56 - d.stroke, area[3]] : area;
+  const artwork = clipPaths(paths, textArea);
+  const lettering = clipPaths(tap?.lettering ?? [], textArea);
+  const signal = clipPaths(tap?.signal ?? [], textArea);
+  let caption = [];
+  if (qr) {
+   const label = textPaths(d.showNfc ? 'OR SCAN' : 'SCAN', font, 0, 0, qr.captionSize, qr.side, warnings, 'Scan caption');
+   const bounds = inkBounds(label.paths);
+   const dx = qr.left + (qr.side - bounds.left - bounds.right) / 2;
+   const dy = qr.captionTop - bounds.top;
+   caption = label.paths.map(path => path.map(([x, y]) => [x + dx, y + dy]));
+  }
+  const safe = [...artwork, ...lettering, ...signal, ...(qr?.paths ?? []), ...caption];
   let length=0;for(const path of safe)for(let i=1;i<path.length;i++)length+=Math.hypot(path[i][0]-path[i-1][0],path[i][1]-path[i-1][1]);
   const stroke=path=>'M '+path.map(([x,y])=>x.toFixed(3)+','+y.toFixed(3)).join(' L ');
   const pathElements = lines => lines.map(line => '<path d="'+stroke(line)+'"/>').join('');
   const promptGroup = lettering.length ? '<g id="tap-prompt">'+pathElements(lettering)+'</g>' : '';
-  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${d.width}mm" height="${d.height}mm" viewBox="0 0 ${d.width} ${d.height}"><title>${escape(d.name||'Business card')} — Card Studio</title><desc>Plot at actual size. Transparent background. All lettering is pen paths. ${d.width} × ${d.height} mm; ${d.margin} mm safe margin.</desc><g fill="none" stroke="${d.colour}" stroke-width="${d.stroke}" stroke-linecap="round" stroke-linejoin="round">${pathElements(artwork)}${promptGroup}${pathElements(signal)}</g></svg>`;
-  return {svg,paths:safe,length,chip,warnings:[...new Set(warnings)],design:d};
+  const qrGroup = qr ? '<g id="qr-code">'+pathElements(qr.paths)+'</g>'+pathElements(caption) : '';
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${d.width}mm" height="${d.height}mm" viewBox="0 0 ${d.width} ${d.height}"><title>${escape(d.name||'Business card')} — Card Studio</title><desc>Plot at actual size. Transparent background. All lettering is pen paths. ${d.width} × ${d.height} mm; ${d.margin} mm safe margin.</desc><g fill="none" stroke="${d.colour}" stroke-width="${d.stroke}" stroke-linecap="round" stroke-linejoin="round">${pathElements(artwork)}${promptGroup}${pathElements(signal)}${qrGroup}</g></svg>`;
+  return {svg,paths:safe,length,chip,qr,warnings:[...new Set(warnings)],design:d};
  }
  const api={defaults,validate,restoreDraft,isChipCard,build};if(typeof module!=='undefined'&&module.exports)module.exports=api;root.CardEngine=api;
 })(typeof window==='undefined'?globalThis:window);

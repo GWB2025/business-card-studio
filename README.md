@@ -7,13 +7,19 @@ Design an actual-size business card for a pen plotter. The editor starts with an
 ## Design and plot a card
 
 1. Enter your name, a short description and any contact details. Choose one of the four Hershey stroke fonts.
-2. Choose **Vortex**, **Waves** or **Orbit**. Adjust the number of curves and the twist while watching the preview.
+2. Choose **Vortex**, **Waves** or **Orbit** for the right-hand design, or tick **Use a QR code instead of the motif** and enter a full website address.
 3. Choose the card size, safe margin and pen width. Use **Download SVG** to export the drawing with its physical dimensions and all lettering converted to pen paths.
 4. In SVG Plotter, choose the matching page size and **Keep original size and position**. Use **100% scale**.
 
 On the default 85 × 55 mm stock, **TAP TO CONNECT** is centred over the 7.5 × 5 mm chip. Its centre is 20 mm from the left edge and 35 mm from the top of the landscape card. **Layout guides** shows the chip outline in the preview. Only the lettering and signal symbol are plotted there. For stock with a different chip position, clear **Centre the prompt on the NFC chip** to use the lower-left prompt.
 
 Use **Save design** to keep an editable JSON copy. **Open design** restores it on another device or in another browser. Automatic drafts are stored separately for each browser and site address. To bring a draft across from the original ChatGPT site, save it there and open the JSON in this edition.
+
+## Tap or scan
+
+QR mode uses the right-hand panel of the card. The caption reads **OR SCAN** when the tap prompt is enabled and **SCAN** when it is switched off. The URL and QR setting are included when you save a design. Generating the code happens locally in your browser.
+
+The SVG fills each dark run with pen strokes at the selected pen width and leaves four clear modules around the code. Set the pen width to the width your pen actually draws. For finer detail, use a shorter link, a finer pen or a wider card. On semi-clear stock, test one plot with a dark pen and a light backing. Programme the NFC tag separately with the same URL if you want both methods to open the same page.
 
 ## Run locally
 
@@ -29,10 +35,12 @@ Then open [localhost:8000](http://localhost:8000/). The editor loads its bundled
 
 The interface is in `index.html`, `style.css` and `app.js`. The geometry and SVG generator are in `card.js`. The stroke fonts are in `fonts.json`, with their accompanying [licence](FONT-LICENCE.txt).
 
+The QR pen paths are generated in `qr.js`. The bundled encoder is [qrcode-generator 2.0.4 by Kazuhiko Arase](https://github.com/kazuhikoarase/qrcode-generator/tree/83b7e8fe3fddd3b0368dbafd6ce56995bd25e3c8), distributed under its [MIT licence](vendor/qrcode-LICENSE.txt).
+
 Run the SVG export checks with Node.js 20 or later:
 
 ```sh
-node --test tests/card.test.cjs
+node --test tests/*.cjs
 ```
 
 GitHub Pages publishes the root of the `main` branch.

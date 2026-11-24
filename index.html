@@ -19,7 +19,14 @@ MAKING · ART</textarea></label>
     <p class="field-note">For a 7.5 × 5 mm chip centred 20 mm from the left edge and 35 mm from the top.</p>
    </div>
   </section>
-  <section class="control-section"><h2><span>02</span> The right-hand motif</h2>
+  <section class="control-section"><h2><span>02</span> Right-hand design</h2>
+   <label class="check"><input id="showQr" data-key="showQr" type="checkbox"><span>Use a QR code instead of the motif</span></label>
+   <div id="qr-settings" hidden>
+    <label for="qrUrl">Website address<input id="qrUrl" data-key="qrUrl" type="url" placeholder="https://example.com" autocomplete="off" spellcheck="false" aria-describedby="qr-note qr-error"></label>
+    <p id="qr-note" class="field-note">Use dark ink on a light backing. For tap and scan to open the same page, write this address to your NFC tag separately.</p>
+    <p id="qr-error" class="field-note qr-error" hidden></p>
+   </div>
+   <div id="motif-settings">
    <div class="motif-options" role="group" aria-label="Pattern style">
     <button type="button" class="motif active" data-motif="vortex" aria-pressed="true"><svg viewBox="0 0 70 40" aria-hidden="true"><path d="M6 35Q60 40 36 18T59 3M3 26Q48 38 36 18T48 2M8 12Q41 30 36 18T36 2M17 3Q29 21 36 18T67 12M3 38Q58 48 44 20T67 2M18 38Q61 35 48 16T63 2"/></svg>Vortex</button>
     <button type="button" class="motif" data-motif="waves" aria-pressed="false"><svg viewBox="0 0 70 40" aria-hidden="true"><path d="M2 8Q19 0 36 8T69 8M2 15Q19 7 36 15T69 15M2 22Q19 14 36 22T69 22M2 29Q19 21 36 29T69 29M2 36Q19 28 36 36T69 36"/></svg>Waves</button>
@@ -28,6 +35,7 @@ MAKING · ART</textarea></label>
    <label class="range-label" for="density">Number of curves<output id="density-out">19</output></label><input id="density" data-key="density" type="range" min="8" max="32" step="1" value="19">
    <label class="range-label" for="twist">Flow &amp; twist<output id="twist-out">2.2</output></label><input id="twist" data-key="twist" type="range" min="0" max="4" step="0.1" value="2.2">
    <button id="variation" class="subtle full" type="button">↻ &nbsp; Try another variation</button>
+   </div>
   </section>
   <section class="control-section"><h2><span>03</span> Card &amp; pen</h2>
    <label>Card format<select id="format"><option value="85,55">NFC business card · 85 × 55 mm</option><option value="85,54">Business card · 85 × 54 mm</option><option value="54,85">Portrait card · 54 × 85 mm</option><option value="90,50">Business card · 90 × 50 mm</option><option value="custom">Custom dimensions</option></select></label>
@@ -47,4 +55,4 @@ MAKING · ART</textarea></label>
   <details class="plotting-help"><summary>Plotting on your plastic NFC cards <span>+</span></summary><div><p>In SVG Plotter, choose an <strong>85 × 55 mm</strong> page (or your custom dimensions), then <strong>Keep original size and position</strong>. Use 100% scale; the design already includes its safe margin.</p><p>Start with your Sharpie fine point and a single test card held on a carrier sheet. Let the ink dry before handling. The pattern has an open centre to reduce crowded strokes.</p><p>The white areas remain unmarked plastic. The semi-clear preview is illustrative. This app creates the artwork; programme your NFC tag separately.</p><p>Drafts are saved in this browser. Use <strong>Save design</strong> for a JSON backup you can open on another device.</p></div></details>
   <footer>Made of mathematics. Finished by you.<a href="FONT-LICENCE.txt" target="_blank" rel="noopener">Stroke font licence</a></footer>
  </div>
-</main><div id="toast" class="toast" role="status" hidden></div><script src="card.js"></script><script src="app.js"></script></body></html>
+</main><div id="toast" class="toast" role="status" hidden></div><script src="vendor/qrcode.js"></script><script src="qr.js"></script><script src="card.js"></script><script src="app.js"></script></body></html>

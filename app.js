@@ -16,6 +16,11 @@ function syncControls(){
  $('twist').disabled=design.motif==='orbit';
 }
 function render(){
+ const qrField = $('qrUrl');
+ $('qr-settings').hidden = !design.showQr;
+ $('motif-settings').hidden = design.showQr;
+ $('qr-error').hidden = true;
+ qrField.removeAttribute('aria-invalid');
  for(const key of ['density','twist','bodySize'])$(key+'-out').textContent=design[key]+(key==='bodySize'?' mm':'');
  $('prompt-label').hidden=!design.showNfc;
  $('twist').disabled=design.motif==='orbit';
@@ -47,6 +52,15 @@ function render(){
   result=null;$('feedback').className='feedback error';$('feedback').textContent=error.message;
   for(const id of ['export','export-top','share','save-design'])$(id).disabled=true;
   $('open-svg').removeAttribute('href');
+  if (svgUrl) { URL.revokeObjectURL(svgUrl); svgUrl = null; }
+  $('artwork').replaceChildren();
+  $('chip-guide').hidden = true;
+  $('path-count').textContent = $('path-length').textContent = '—';
+  if (design.showQr && /website address|QR|shorter URL/.test(error.message)) {
+   $('qr-error').textContent = error.message;
+   $('qr-error').hidden = false;
+   qrField.setAttribute('aria-invalid', 'true');
+  }
  }
 }
 function filename(extension){return (design.name.trim()||'my-card').replace(/[^a-zA-Z0-9_-]+/g,'-').slice(0,55)+'-'+design.width+'x'+design.height+'mm.'+extension;}
