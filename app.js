@@ -21,6 +21,16 @@ function render(){
  $('twist').disabled=design.motif==='orbit';
  try{
   const next=CardEngine.build(design,fonts);result=next;
+  $('chip-position').hidden = !design.showNfc || !CardEngine.isChipCard(design);
+  const chipGuide = $('chip-guide');
+  chipGuide.hidden = !next.chip;
+  if (next.chip) {
+   const chip = next.chip;
+   chipGuide.style.left = 100 * (chip.x - chip.width / 2) / design.width + '%';
+   chipGuide.style.top = 100 * (chip.y - chip.height / 2) / design.height + '%';
+   chipGuide.style.width = 100 * chip.width / design.width + '%';
+   chipGuide.style.height = 100 * chip.height / design.height + '%';
+  }
   $('artwork').innerHTML=next.svg;
   $('dimensions').textContent=`${design.width} × ${design.height} mm`;
   $('width-label').textContent=design.width+' mm';
@@ -63,7 +73,7 @@ for(const button of document.querySelectorAll('[data-motif]'))button.addEventLis
 for(const button of document.querySelectorAll('[data-colour]'))button.addEventListener('click',()=>{design.colour=button.dataset.colour;syncControls();render();});
 $('variation').addEventListener('click',()=>{design.phase=(design.phase+37)%360;render();});
 $('plastic').addEventListener('change',()=>{$('card-wrap').classList.toggle('plastic',$('plastic').checked);});
-$('show-guide').addEventListener('change',()=>{$('safe-guide').hidden=!$('show-guide').checked;});
+$('show-guide').addEventListener('change',()=>{$('layout-guides').hidden=!$('show-guide').checked;});
 function zoomTo(value){zoom=Math.max(70,Math.min(130,value));$('card-wrap').style.transform=`scale(${zoom/100})`;$('zoom-value').textContent=zoom+'%';$('zoom-out').disabled=zoom===70;$('zoom-in').disabled=zoom===130;}
 $('zoom-out').addEventListener('click',()=>zoomTo(zoom-10));$('zoom-in').addEventListener('click',()=>zoomTo(zoom+10));
 $('save-design').addEventListener('click',()=>{if(!result)return;download(new Blob([JSON.stringify({format:'card-studio',version:1,design},null,2)],{type:'application/json'}),filename('json'));toast('Design saved. Open this JSON file to edit it later.');});
@@ -87,7 +97,7 @@ async function init(){
  try{
   const response=await fetch('fonts.json');if(!response.ok)throw Error('The fonts could not be loaded. Please reload the app.');fonts=await response.json();
   for(const font of fonts){const option=document.createElement('option');option.value=font.id;option.textContent=font.name;$('font').append(option);}
-  try{const saved=JSON.parse(localStorage.getItem(STORAGE)||'null');if(saved?.format==='card-studio'&&saved.version===1){const candidate=CardEngine.validate(saved.design);CardEngine.build(candidate,fonts);design=candidate;}}catch{toast('Started a fresh design. You can open a saved JSON backup.');}
+  try{const saved=JSON.parse(localStorage.getItem(STORAGE)||'null');if(saved?.format==='card-studio'&&saved.version===1){const candidate=CardEngine.restoreDraft(saved.design);CardEngine.build(candidate,fonts);design=candidate;}}catch{toast('Started a fresh design. You can open a saved JSON backup.');}
   syncControls();render();
  }catch(error){$('feedback').textContent=error.message;$('feedback').className='feedback error';}
 }
