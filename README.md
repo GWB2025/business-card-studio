@@ -19,7 +19,9 @@ Use **Save design** to keep an editable JSON copy. **Open design** restores it o
 
 QR mode uses the right-hand panel of the card. The caption reads **OR SCAN** when the tap prompt is enabled and **SCAN** when it is switched off. The URL and QR setting are included when you save a design. Generating the code happens locally in your browser.
 
-The SVG fills each dark run with pen strokes at the selected pen width and leaves four clear modules around the code. Set the pen width to the width your pen actually draws. For finer detail, use a shorter link, a finer pen or a wider card. On semi-clear stock, test one plot with a dark pen and a light backing. Programme the NFC tag separately with the same URL if you want both methods to open the same page.
+The card preview shows solid black squares on white. Choose **Scan QR on screen** for a larger code. The link beneath it opens the encoded address so you can check the destination before plotting.
+
+The SVG uses the same grid. The pen draws one straight horizontal stroke at a time, lifting across gaps and before changing direction. Four blank modules surround the code. Set the pen width to the width your pen actually draws. For finer detail, use a shorter link, a finer pen or a wider card. On semi-clear stock, test one plot with a dark pen and a light backing. Programme the NFC tag separately with the same URL if you want both methods to open the same page.
 
 ## Run locally
 

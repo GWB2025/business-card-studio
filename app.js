@@ -36,7 +36,8 @@ function render(){
    chipGuide.style.width = 100 * chip.width / design.width + '%';
    chipGuide.style.height = 100 * chip.height / design.height + '%';
   }
-  $('artwork').innerHTML=next.svg;
+  $('artwork').innerHTML=next.previewSvg;
+  $('scan-screen').disabled = !next.qr;
   $('dimensions').textContent=`${design.width} × ${design.height} mm`;
   $('width-label').textContent=design.width+' mm';
   $('card-wrap').style.maxWidth=design.width<design.height?'420px':'710px';
@@ -49,6 +50,7 @@ function render(){
   if(svgUrl)URL.revokeObjectURL(svgUrl);svgUrl=URL.createObjectURL(new Blob([next.svg],{type:'image/svg+xml'}));$('open-svg').href=svgUrl;
   try{localStorage.setItem(STORAGE,JSON.stringify({format:'card-studio',version:1,design}));$('saved-status').textContent='Draft saved in this browser';}catch{$('saved-status').textContent='Use Save design to keep a copy';}
  }catch(error){
+  $('scan-screen').disabled = true;
   result=null;$('feedback').className='feedback error';$('feedback').textContent=error.message;
   for(const id of ['export','export-top','share','save-design'])$(id).disabled=true;
   $('open-svg').removeAttribute('href');
@@ -63,6 +65,14 @@ function render(){
   }
  }
 }
+$('scan-screen').addEventListener('click', () => {
+ if (!result?.qr) return;
+ $('scan-code').innerHTML = result.qr.screenSvg;
+ const address = $('scan-address');
+ address.href = design.qrUrl.trim();
+ address.textContent = address.href;
+ $('scan-dialog').showModal();
+});
 function filename(extension){return (design.name.trim()||'my-card').replace(/[^a-zA-Z0-9_-]+/g,'-').slice(0,55)+'-'+design.width+'x'+design.height+'mm.'+extension;}
 function download(blob,name){const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=name;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);}
 function exportSvg(){if(result){download(new Blob([result.svg],{type:'image/svg+xml'}),filename('svg'));toast('SVG ready. Plot at actual size (100%).');}}

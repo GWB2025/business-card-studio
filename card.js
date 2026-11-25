@@ -172,9 +172,12 @@
   const stroke=path=>'M '+path.map(([x,y])=>x.toFixed(3)+','+y.toFixed(3)).join(' L ');
   const pathElements = lines => lines.map(line => '<path d="'+stroke(line)+'"/>').join('');
   const promptGroup = lettering.length ? '<g id="tap-prompt">'+pathElements(lettering)+'</g>' : '';
-  const qrGroup = qr ? '<g id="qr-code">'+pathElements(qr.paths)+'</g>'+pathElements(caption) : '';
-  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${d.width}mm" height="${d.height}mm" viewBox="0 0 ${d.width} ${d.height}"><title>${escape(d.name||'Business card')} — Card Studio</title><desc>Plot at actual size. Transparent background. All lettering is pen paths. ${d.width} × ${d.height} mm; ${d.margin} mm safe margin.</desc><g fill="none" stroke="${d.colour}" stroke-width="${d.stroke}" stroke-linecap="round" stroke-linejoin="round">${pathElements(artwork)}${promptGroup}${pathElements(signal)}${qrGroup}</g></svg>`;
-  return {svg,paths:safe,length,chip,qr,warnings:[...new Set(warnings)],design:d};
+  const cardStart = `<svg xmlns="http://www.w3.org/2000/svg" width="${d.width}mm" height="${d.height}mm" viewBox="0 0 ${d.width} ${d.height}"><title>${escape(d.name||'Business card')} — Card Studio</title><desc>Plot at actual size. Transparent background. All lettering is pen paths. ${d.width} × ${d.height} mm; ${d.margin} mm safe margin.</desc><g fill="none" stroke="${d.colour}" stroke-width="${d.stroke}" stroke-linecap="round" stroke-linejoin="round">${pathElements(artwork)}${promptGroup}${pathElements(signal)}`;
+  const cardEnd = pathElements(caption) + '</g></svg>';
+  const plotGroup = qr ? '<g id="qr-code">'+pathElements(qr.paths)+'</g>' : '';
+  const svg = cardStart + plotGroup + cardEnd;
+  const previewSvg = qr ? cardStart + `<g transform="translate(${qr.left} ${qr.top}) scale(${qr.pitch})">${qr.screenSvg}</g>` + cardEnd : svg;
+  return {svg,previewSvg,paths:safe,length,chip,qr,warnings:[...new Set(warnings)],design:d};
  }
  const api={defaults,validate,restoreDraft,isChipCard,build};if(typeof module!=='undefined'&&module.exports)module.exports=api;root.CardEngine=api;
 })(typeof window==='undefined'?globalThis:window);

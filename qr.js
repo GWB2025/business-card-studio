@@ -44,24 +44,35 @@
     const radius = design.stroke / 2;
     const intervals = Math.ceil((pitch - design.stroke) / (design.stroke * 0.8));
     const paths = [];
+    const rectangles = [];
+    let reverse = false;
     for (let row = 0; row < count; row++) {
-      const rowTop = top + (row + quietModules) * pitch;
+      const runs = [];
       for (let col = 0; col < count;) {
         if (!symbol.isDark(row, col)) { col++; continue; }
-        const first = col;
+        const start = col;
         while (col < count && symbol.isDark(row, col)) col++;
-        // Hatch each dark run continuously. The inset keeps round pen caps inside it.
-        const x1 = left + (first + quietModules) * pitch + radius;
-        const x2 = left + (col + quietModules) * pitch - radius;
-        const path = [];
-        for (let pass = 0; pass <= intervals; pass++) {
-          const y = rowTop + radius + (pitch - design.stroke) * pass / intervals;
-          path.push([pass % 2 ? x2 : x1, y], [pass % 2 ? x1 : x2, y]);
+        const width = col - start;
+        rectangles.push(`M${start + quietModules} ${row + quietModules}h${width}v1h-${width}z`);
+        runs.push([
+          left + (start + quietModules) * pitch + radius,
+          left + (col + quietModules) * pitch - radius
+        ]);
+      }
+      // Finish each scanline before advancing. Lift over gaps and reverse only with the pen up.
+      const rowTop = top + (row + quietModules) * pitch;
+      for (let pass = 0; pass <= intervals; pass++) {
+        const y = rowTop + radius + (pitch - design.stroke) * pass / intervals;
+        for (let i = 0; i < runs.length; i++) {
+          const [x1, x2] = runs[reverse ? runs.length - 1 - i : i];
+          paths.push(reverse ? [[x2, y], [x1, y]] : [[x1, y], [x2, y]]);
         }
-        paths.push(path);
+        reverse = !reverse;
       }
     }
-    return { paths, left, top, side, pitch, captionSize, captionTop: top + side + captionGap };
+    const grid = count + 2 * quietModules;
+    const screenSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${grid}" height="${grid}" viewBox="0 0 ${grid} ${grid}" shape-rendering="crispEdges" stroke="none" aria-label="QR code"><rect width="${grid}" height="${grid}" fill="#fff"/><path fill="#000" d="${rectangles.join('')}"/></svg>`;
+    return { paths, screenSvg, left, top, side, pitch, captionSize, captionTop: top + side + captionGap };
   }
 
   const api = { plot };
