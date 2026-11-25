@@ -13,6 +13,8 @@ Design an actual-size business card for a pen plotter. The editor starts with an
 
 On the default 85 × 55 mm stock, **TAP TO CONNECT** is centred over the 7.5 × 5 mm chip. Its centre is 20 mm from the left edge and 35 mm from the top of the landscape card. **Layout guides** shows the chip outline in the preview. Only the lettering and signal symbol are plotted there. For stock with a different chip position, clear **Centre the prompt on the NFC chip** to use the lower-left prompt.
 
+For a round adhesive tag, tick **Plot 23 mm stick-on tag outline** under **Your details**. On an 85 × 55 mm card the raised tap row reads **TAP HERE**, followed by the empty circle and the signal symbol. The circle is 23 mm across at the centre of the pen stroke. Plot at 100% and centre the sticker on the outline. You can edit the tap wording. Untick the option to return to the embedded-chip layout. On narrow cards the sticker row uses the full card width below the artwork.
+
 Use **Save design** to keep an editable JSON copy. **Open design** restores it on another device or in another browser. Automatic drafts are stored separately for each browser and site address. To bring a draft across from the original ChatGPT site, save it there and open the JSON in this edition.
 
 ## Tap or scan

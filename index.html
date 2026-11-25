@@ -13,10 +13,13 @@ MAKING · ART</textarea></label>
    <div class="field-row"><label>Stroke font<select id="font" data-key="font"></select></label><label>Name height <span class="unit">mm</span><input id="nameSize" data-key="nameSize" type="number" min="3" max="10" step="0.5" value="6"></label></div>
    <label class="range-label" for="bodySize">Small text height <output id="bodySize-out">2.2 mm</output></label><input id="bodySize" data-key="bodySize" type="range" min="1.5" max="4" step="0.1" value="2.2">
    <label class="check"><input id="showNfc" data-key="showNfc" type="checkbox" checked><span>Include a tap-to-connect prompt</span></label>
-   <label for="prompt" id="prompt-label">Tap prompt<input id="prompt" data-key="prompt" maxlength="60" value="TAP TO CONNECT"></label>
-   <div id="chip-position">
-    <label class="check"><input id="centreOnChip" data-key="centreOnChip" type="checkbox" checked><span>Centre the prompt on the NFC chip</span></label>
-    <p class="field-note">For a 7.5 × 5 mm chip centred 20 mm from the left edge and 35 mm from the top.</p>
+   <div id="tap-settings">
+    <label for="prompt" id="prompt-label">Tap prompt<input id="prompt" data-key="prompt" maxlength="60" value="TAP TO CONNECT"></label>
+    <label class="check"><input id="showTagOutline" data-key="showTagOutline" type="checkbox"><span>Plot 23 mm stick-on tag outline</span></label>
+    <div id="chip-position">
+     <label class="check"><input id="centreOnChip" data-key="centreOnChip" type="checkbox" checked><span>Centre the prompt on the NFC chip</span></label>
+     <p class="field-note">For a 7.5 × 5 mm chip centred 20 mm from the left edge and 35 mm from the top.</p>
+    </div>
    </div>
   </section>
   <section class="control-section"><h2><span>02</span> Right-hand design</h2>

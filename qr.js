@@ -25,10 +25,9 @@
     return symbol;
   }
 
-  function plot(design) {
+  function plot(design, columnLeft = design.width * 0.56) {
     const symbol = symbolFor(design.qrUrl);
     const count = symbol.getModuleCount();
-    const columnLeft = design.width * 0.56;
     const columnWidth = design.width - design.margin - columnLeft;
     const availableHeight = design.height - 2 * design.margin;
     const captionSize = Math.min(2.2, design.bodySize);

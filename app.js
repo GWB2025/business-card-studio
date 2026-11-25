@@ -12,8 +12,13 @@ function syncControls(){
  $('width').readOnly=$('height').readOnly=$('format').value!=='custom';
  for(const button of document.querySelectorAll('[data-motif]')){const active=button.dataset.motif===design.motif;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));}
  for(const button of document.querySelectorAll('[data-colour]')){const active=button.dataset.colour.toLowerCase()===design.colour.toLowerCase();button.classList.toggle('selected',active);button.setAttribute('aria-pressed',String(active));}
- $('prompt-label').hidden=!design.showNfc;
+ syncTapControls();
  $('twist').disabled=design.motif==='orbit';
+}
+function syncTapControls(){
+ const prompt = $('prompt');
+ prompt.dataset.key = design.showTagOutline ? 'tagPrompt' : 'prompt';
+ prompt.value = CardEngine.tapPrompt(design);
 }
 function render(){
  const qrField = $('qrUrl');
@@ -22,11 +27,11 @@ function render(){
  $('qr-error').hidden = true;
  qrField.removeAttribute('aria-invalid');
  for(const key of ['density','twist','bodySize'])$(key+'-out').textContent=design[key]+(key==='bodySize'?' mm':'');
- $('prompt-label').hidden=!design.showNfc;
+ $('tap-settings').hidden = !design.showNfc;
+ $('chip-position').hidden = design.showTagOutline || !CardEngine.isChipCard(design);
  $('twist').disabled=design.motif==='orbit';
  try{
   const next=CardEngine.build(design,fonts);result=next;
-  $('chip-position').hidden = !design.showNfc || !CardEngine.isChipCard(design);
   const chipGuide = $('chip-guide');
   chipGuide.hidden = !next.chip;
   if (next.chip) {
@@ -85,6 +90,7 @@ $('share').addEventListener('click',async()=>{
 });
 for(const el of document.querySelectorAll('[data-key]'))el.addEventListener('input',()=>{
  const key=el.dataset.key;design[key]=el.type==='checkbox'?el.checked:numeric.has(key)?Number(el.value):el.value;
+ if(key==='showTagOutline')syncTapControls();
  if(key==='colour')for(const button of document.querySelectorAll('[data-colour]')){const active=button.dataset.colour===design.colour;button.classList.toggle('selected',active);button.setAttribute('aria-pressed',String(active));}
  render();
 });
