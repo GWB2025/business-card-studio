@@ -163,13 +163,15 @@
    const dy = cy - (b.top + b.bottom) / 2;
    for (const line of label.paths) for (const point of line) point[1] += dy;
   }
-  // A single closed pen path, sampled at the quadrants for a true 23 mm span.
-  const outline = Array.from({length:128}, (_,i) => {
-   const angle = 2 * Math.PI * i / 128;
-   return [cx + tagRadius * Math.cos(angle), cy + tagRadius * Math.sin(angle)];
-  });
-  outline.push(outline[0]);
-  return { outline, fullWidth, lettering: label.paths, signal: signalPaths(signalX,cy),
+  // Each six-degree arc is a separate pen stroke, about 1.2 mm long.
+  const halfArc = 3 * Math.PI / 180;
+  const marks = [0, Math.PI / 2, Math.PI, 3 * Math.PI / 2].map(centreAngle =>
+   [-halfArc, 0, halfArc].map(offset => {
+    const angle = centreAngle + offset;
+    return [cx + tagRadius * Math.cos(angle), cy + tagRadius * Math.sin(angle)];
+   })
+  );
+  return { marks, fullWidth, lettering: label.paths, signal: signalPaths(signalX,cy),
    top: cy - tagRadius, bottom: cy + tagRadius };
  }
  function build(input,fonts){
@@ -224,7 +226,7 @@
   const tapArea = tag?.fullWidth ? area : textArea;
   const lettering = clipPaths(tap?.lettering ?? [], tapArea);
   const signal = clipPaths(tap?.signal ?? [], tapArea);
-  const outline = tag ? [tag.outline] : [];
+  const tagMarks = tag?.marks ?? [];
   let caption = [];
   if (qr) {
    const label = textPaths(d.showNfc ? 'OR SCAN' : 'SCAN', font, 0, 0, qr.captionSize, qr.side, warnings, 'Scan caption');
@@ -233,12 +235,12 @@
    const dy = qr.captionTop - bounds.top;
    caption = label.paths.map(path => path.map(([x, y]) => [x + dx, y + dy]));
   }
-  const safe = [...artwork, ...lettering, ...outline, ...signal, ...(qr?.paths ?? []), ...caption];
+  const safe = [...artwork, ...lettering, ...tagMarks, ...signal, ...(qr?.paths ?? []), ...caption];
   let length=0;for(const path of safe)for(let i=1;i<path.length;i++)length+=Math.hypot(path[i][0]-path[i-1][0],path[i][1]-path[i-1][1]);
   const stroke=path=>'M '+path.map(([x,y])=>x.toFixed(3)+','+y.toFixed(3)).join(' L ');
   const pathElements = lines => lines.map(line => '<path d="'+stroke(line)+'"/>').join('');
   const promptGroup = lettering.length ? '<g id="tap-prompt">'+pathElements(lettering)+'</g>' : '';
-  const tagGroup = tag ? '<g id="tag-outline">'+pathElements(outline)+'</g>' : '';
+  const tagGroup = tag ? '<g id="tag-outline">'+pathElements(tagMarks)+'</g>' : '';
   const signalGroup = tag ? '<g id="tap-signal">'+pathElements(signal)+'</g>' : pathElements(signal);
   const cardStart = `<svg xmlns="http://www.w3.org/2000/svg" width="${d.width}mm" height="${d.height}mm" viewBox="0 0 ${d.width} ${d.height}"><title>${escape(d.name||'Business card')} — Card Studio</title><desc>Plot at actual size. Transparent background. All lettering is pen paths. ${d.width} × ${d.height} mm; ${d.margin} mm safe margin.</desc><g fill="none" stroke="${d.colour}" stroke-width="${d.stroke}" stroke-linecap="round" stroke-linejoin="round">${pathElements(artwork)}${promptGroup}${tagGroup}${signalGroup}`;
   const cardEnd = pathElements(caption) + '</g></svg>';

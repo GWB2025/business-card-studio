@@ -9,20 +9,28 @@ function points(markup) {
   return Array.from(markup.matchAll(/([\d.-]+),([\d.-]+)/g), m => [Number(m[1]), Number(m[2])]);
 }
 
-test('exports one closed 23 mm tag outline between the raised tap prompt and signal', () => {
+test('exports four short placement marks on the 23 mm tag footprint in preview and plot', () => {
   const plain = build(defaults, fonts);
   const card = build(sticker, fonts);
   const ring = group(card.svg, 'tag-outline');
   assert.ok(ring);
   assert.equal(group(card.previewSvg, 'tag-outline'), ring);
-  assert.equal(ring.match(/<path /g).length, 1);
+  const marks = Array.from(ring.matchAll(/<path d="([^"]+)"/g), m => points(m[1]));
+  assert.equal(marks.length, 4);
+  for (const mark of marks) {
+    const length = mark.slice(1).reduce((sum, [x,y], i) =>
+      sum + Math.hypot(x - mark[i][0], y - mark[i][1]), 0);
+    assert.ok(length >= 1 && length <= 1.3, 'each mark is about 1.2 mm long');
+  }
   const pen = points(ring);
   const xs = pen.map(p => p[0]), ys = pen.map(p => p[1]);
   const left = Math.min(...xs), right = Math.max(...xs), top = Math.min(...ys), bottom = Math.max(...ys);
   const cx = (left + right) / 2, cy = (top + bottom) / 2;
   assert.equal(right - left, 23);
   assert.equal(bottom - top, 23);
-  assert.deepEqual(pen[0], pen.at(-1));
+  for (const [x, y] of [[left, cy], [right, cy], [cx, top], [cx, bottom]]) {
+    assert.ok(marks.some(mark => mark.some(([px, py]) => Math.hypot(px-x, py-y) < .001)));
+  }
   assert.ok(pen.every(([x,y]) => Math.abs(Math.hypot(x-cx,y-cy) - 11.5) < 0.001));
   const label = points(group(card.svg,'tap-prompt')), signal = points(group(card.svg,'tap-signal'));
   assert.ok(label.every(([x]) => x < left - 1));
